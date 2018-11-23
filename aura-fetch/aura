@@ -30,7 +30,6 @@ get_os() {
 	os=$(uname -o)
 	host=$(uname -n)
 
-	# Uses hostname if the os is labelled generic
 	# Change the "os" declaration above if needed
 	case $os in
 		"GNU/Linux") # check for generic pitfall
