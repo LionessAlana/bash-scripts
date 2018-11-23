@@ -33,11 +33,10 @@ get_os() {
 	# Change the "os" declaration above if needed
 	case $os in
 		"GNU/Linux") # check for generic pitfall
-			if [[ -d /boot/efi/EFI/Archlabs/ ]]; then
-				output $title "archlabs"
-			# if your distro is listed as generic,
-			# add an elif to catch it here.
-			fi
+			os=$(grep 'DISTRIB_ID=\(\w\+\)' /etc/lsb-release)
+			os=${os/*=}
+			os=${os,,}
+			output $title $os
 		;;
 
 		*) # catch others
