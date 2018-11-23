@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+echo
+
+# Main function
+# Edit/remove entries here 
+get_info() {
+	get_os
+	get_wm
+	get_pkg
+	get_term
+	get_colors
+}
+
+# Format and output entries 
+output() {
+	c="\e[0m"
+	c1="\e[32;1m"
+	title=$1
+	info=$2
+
+	printf " ${c1}${title}:${c}	"
+	printf "%12.30s" ${info}
+	printf "\n"
+}
+
+# OS
+get_os() {
+	title="os"
+	os=$(uname -o)
+	host=$(uname -n)
+
+	# Uses hostname if the os is labelled generic
+	# Change the "os" declaration above if needed
+	case $os in
+		"GNU/Linux") # check for generic pitfall
+			if [[ -d /boot/efi/EFI/Archlabs/ ]]; then
+				output $title "archlabs"
+			# if your distro is listed as generic,
+			# add an elif to catch it here.
+			fi
+		;;
+
+		*) # catch others
+			output $title $os
+		;;
+	esac
+}
+
+# WM
+# Adapted from neofetch wm function
+get_wm() {
+	title="wm"
+
+	id=$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)
+	id=${id##* }
+	wm="$(xprop -id "$id" -notype -len 100 -f _NET_WM_NAME 8t)"
+
+	# Split name from inside double quotes
+	wm="${wm/*\ \"}" 
+	wm="${wm/\"*}"
+
+	# Check for i3-gaps
+	if [[ $wm == "i3" ]]; then 
+		if [[ $(pacman -Qs i3-gaps) ]]; then
+			wm="i3-gaps"
+		fi
+	fi
+	output $title $wm
+}
+
+# Packages
+# Get the number of packages from pacman
+# Edit this if you use a different package manager
+# "wc -l" counts the number of lines
+get_pkg() {
+	title="pkgs"
+	count="$(pacman -Qq | wc -l)"
+
+	output $title $count
+}
+
+# Terminal
+# Get the current terminal process id and match it
+get_term() {
+	title="term"
+	pid=$(ps -h -o ppid)
+	ppid=$(ps -h -o comm -p $pid)
+
+	case "$ppid" in
+		alacritty*)
+			term="alacritty"
+			;;
+		kitty*)
+			term="kitty"
+			;;
+		xterm*)
+			term="xterm"
+			;;
+		konsole*)
+			term="konsole"
+			;;
+		gnome-terminal*)
+			term="gnome terminal"
+			;;
+		terminator*)
+			term="terminator"
+			;;
+		rxvt*)
+			term="rxvt"
+			;;
+		rxvt-unicode*)
+			term="urxvt"
+			;;
+	esac
+
+	output $title $term
+}
+
+# Colors
+# Prints the terminal colors
+get_colors() {
+	c="\e[0m"
+	c0="\e[30m"
+	c1="\e[31m"
+	c2="\e[32m"
+	c3="\e[33m"
+	c4="\e[34m"
+	c5="\e[35m"
+	c6="\e[36m"
+	c7="\e[37m"
+	sym="\u25b2"
+	sym1="\u25bc"
+
+	printf "\n    ${c1}${sym} ${c2}${sym1} ${c3}${sym} ${c4}${sym1} ${c5}${sym} ${c6}${sym1} ${c7}${sym}${c}\n"
+}
+
+# Main function call
+get_info
+echo
