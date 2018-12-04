@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+if [[ $(xrdb -query | grep 'night') ]]; then
+	mode="night"
+else
+	mode="day"
+fi
+
+if [ $mode == "day" ]; then
+	echo Switching to night mode...
+	xrdb -load ~/.Xresources.night
+	pkill polybar
+	polybar -r left & 
+	polybar -r center & 
+	polybar -r right &
+fi
+
+if [ $mode == "night" ]; then
+	echo Switching to day mode...
+	xrdb -load ~/.Xresources.day
+	pkill polybar
+	polybar -r left &
+	polybar -r center &
+	polybar -r right &
+fi
